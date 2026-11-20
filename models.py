@@ -1,6 +1,6 @@
 # Helpers
 
-# H1
+# H1--------------time to minutes
 def time_to_minutes(text):
     text = text.strip()
     if ":" not in text:
@@ -23,7 +23,7 @@ def time_to_minutes(text):
         raise ValueError("Enter a valid time between 0-23 for hours & 0-59 for minutes")
     else:
         return hours_int * 60 + minutes_int
-    
+
 # Test cases for H1
 if __name__ == "__main__":
     tests = ["09:30", "9:00", "23:59", "0930", "25:00", "09:6", "ab:cd", "09:30:00"]
@@ -32,6 +32,28 @@ if __name__ == "__main__":
             print(t, "equals", time_to_minutes(t))
         except ValueError as e:
             print(t, "rejected:", e)
+
+# H2-------------- minutes to time
+def minutes_to_time(mins):
+    if not isinstance(mins, int):
+        raise ValueError("Enter a number")
+    elif not 0 <= mins <= 1439:
+        raise ValueError("Enter a range b/w 0-1439")
+    else:
+        unpack = divmod(mins, 60)
+        hours, minutes = unpack
+        return f"{hours:02d}:{minutes:02d}"
+    
+# Test cases for H2
+if __name__ == "__main__":
+    tests = [570, 540, 0, 1439, -5, 1440]
+    for m in tests:
+        try:
+            print(m, "equals", minutes_to_time(m))
+        except ValueError as e:
+            print(m, "rejected:", e)
+    print(minutes_to_time(time_to_minutes('09:30')))
+
 
 Days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']
 def normalize_day(self, day):
