@@ -108,27 +108,37 @@ def name_cleaner(text):
     return cleaned
 
 # Base for the rest
-class Teacher:
-    def __init__(self, teacher_id, name):
-        self.__teacher_id = normalize_code(teacher_id)
-        self.__name = name_cleaner(name)
 
-    # Methods
-    def get_id(self):
-        return self.__teacher_id
-    def get_name(self):
-        return self.__name
-    
-class Course:
+# Entity class for encapsulation and inheritance (reducing redundancy)
+class Entity:
     def __init__(self, code, name):
         self.__code = normalize_code(code)
         self.__name = name_cleaner(name)
 
-    # Methods
     def get_code(self):
         return self.__code
+
     def get_name(self):
         return self.__name
+
+    def __str__(self):
+        return f"Entity: {self.__code} - {self.__name}"
+    
+class Teacher(Entity):
+    def __init__(self, teacher_id, name):
+        super().__init__(teacher_id, name)
+
+    # Methods
+    def __str__(self):
+        return f"{self.get_name()} ({self.get_code()})"
+    
+class Course(Entity):
+    def __init__(self, code, name):
+        super().__init__(code, name)
+
+    # Methods
+    def __str__(self):
+        return f"{self.get_code()}: {self.get_name()}"
 
 class ClassSession:
     def __init__(self, teacher, course, section_id, room_id, day, start, end, session_id = None):
@@ -185,6 +195,33 @@ class ClassSession:
     def get_session_id(self):
         return self.__session_id
 
+    def __str__(self):
+        return f"{self.get_day()} {minutes_to_time(self.get_start())}-{minutes_to_time(self.get_end())} | {self.get_course()} | {self.get_teacher()} | {self.get_section_id()} | {self.get_room_id()}"
+    
+    # to_dict & from_dict methods so data can be stored
+    def to_dict(self):
+        return {
+            "session_id": self.get_session_id(),
+            "teacher_id": self.get_teacher().get_code(),
+            "teacher_name": self.get_teacher().get_name(),
+            "course_code": self.get_course().get_code(),
+            "course_name": self.get_course().get_name(),
+            "section_id": self.get_section_id(),
+            "room_id": self.get_room_id(),
+            "day": self.get_day(),
+            "start": self.get_start(),
+            "end": self.get_end()
+        }
+
+    @classmethod
+    def from_dict(cls, data):
+        try:
+            teacher = Teacher(data["teacher_id"], data["teacher_name"])
+            course = Course(data["course_code"], data["course_name"])
+            return cls(teacher, course, data["section_id"], data["room_id"],data["day"],data["start"],data["end"], data["session_id"])
+        except KeyError as e:
+            raise ValueError(f"Saved data is missing the field {e}")
+
 """
 Previous Test Cases
 
@@ -197,16 +234,16 @@ if __name__ == "__main__":
     print(f"Teacher Name again: {CS1.get_teacher().get_name()} , Session: {CS1.get_session_id()}")
 """
 
-# Constructor Validation
+# Constructor Validation (refactored)
 if __name__ == "__main__":
 
 # VALID RUNS
     print(f"VALID RUNS")
     t = Teacher(" t01 ", "Faiza")
     c = Course("fin-201", "Financial Accounting")
-    s = ClassSession(t, c, "bsft-3a", "r101", "monday", 555, 600)
+    s = ClassSession(t, c, "bsft-3a", "r101", "monday", 555, 600, 7)
 
-    print("Teacher ID:  ", s.get_teacher().get_id())      # T01
+    print("Teacher ID:  ", s.get_teacher().get_code())      # T01
     print("Teacher name:", s.get_teacher().get_name())    # Faiza
     print("Course code: ", s.get_course().get_code())     # FIN-201
     print("Course name: ", s.get_course().get_name())     # Financial Accounting
@@ -216,6 +253,12 @@ if __name__ == "__main__":
     print("Start:       ", minutes_to_time(s.get_start()))  # 555 09:15
     print("End:         ", minutes_to_time(s.get_end()))      # 600 10:00
     print("Session ID:  ", s.get_session_id())            # None
+    print(t)                          # Faiza (T01)
+    print(c)                          # FIN-201: Financial Accounting
+    print(s)                          # the one-line summary
+    print(isinstance(t, Entity))      # True, Teacher is an Entity
+    print(isinstance(c, Entity))      # True
+    print(t.get_code(), t.get_code())   # T01 T01
 
 # INVALID RUNS (using tuples to unpack clear msgs later)
     print(f"\nINVALID RUNS")
@@ -243,4 +286,20 @@ if __name__ == "__main__":
             print(f"ACCEPTED (bug!):{labels}")
         except ValueError as e:
             print(f"REJECTED {labels}: {e}")
+    
+    d = s.to_dict()
+    back = ClassSession.from_dict(d)
+    print(back)                        # same line as print(s2)
+    print(str(back) == str(s))        # True
+    print(back.get_session_id())       # 7
 
+    bad_day = dict(d, day="Saturday")  # copy of d with the day changed
+    missing = dict(d)
+    del missing["room_id"]             # copy of d with room_id removed
+
+    for label, data in [("bad day", bad_day), ("missing room", missing)]:
+        try:
+            ClassSession.from_dict(data)
+            print("NOT REJECTED (bug!):", label)
+        except ValueError as e:
+            print("Rejected", label + ":", e)
