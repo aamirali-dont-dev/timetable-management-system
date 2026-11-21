@@ -25,6 +25,7 @@ def time_to_minutes(text):
         return hours_int * 60 + minutes_int
 
 # Test cases for H1
+"""
 if __name__ == "__main__":
     tests = ["09:30", "9:00", "23:59", "0930", "25:00", "09:6", "ab:cd", "09:30:00"]
     for t in tests:
@@ -32,7 +33,7 @@ if __name__ == "__main__":
             print(t, "equals", time_to_minutes(t))
         except ValueError as e:
             print(t, "rejected:", e)
-
+"""
 # H2-------------- minutes to time
 def minutes_to_time(mins):
     if not isinstance(mins, int):
@@ -45,6 +46,7 @@ def minutes_to_time(mins):
         return f"{hours:02d}:{minutes:02d}"
     
 # Test cases for H2
+"""
 if __name__ == "__main__":
     tests = [570, 540, 0, 1439, -5, 1440]
     for m in tests:
@@ -53,21 +55,49 @@ if __name__ == "__main__":
         except ValueError as e:
             print(m, "rejected:", e)
     print(minutes_to_time(time_to_minutes('09:30')))
+"""
 
-
+# H3-------------- Day Normalization
 Days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']
-def normalize_day(self, day):
-    self.day = day
-    if day not in Days:
-        raise ValueError("Class can only be schduled Monday through Friday")
-    else:
-        day.title()
+def normalize_day(day):
+    d = day.strip().lower()
 
-def normalize_code(self, code):
-    self.code = code
-    if not code.strip():
-        raise ValueError("Please enter a valid value")
+    for x in Days:
+        if d == x.lower() or d == x[:3].lower():
+            return x
+    raise ValueError("Only Monday to Friday is Allowed")
 
+# Test cases for H3
+"""
+if __name__ == "__main__":
+    tests = ['Monday', 'monday', ' MON ', 'thu', 'Saturday', 'sat', 't', '']
+    for n in tests:
+        try:
+            print(n, "equals", normalize_day(n))
+        except ValueError as e:
+            print(n, "rejected:", e)
+"""
+
+# H4-------------- Code Normalization
+
+def normalize_code(code):
+    cleaned = code.strip().upper()
+    if len(cleaned) == 0:
+        raise ValueError("Enter something, like a valid code")
+    for e in cleaned:
+        if not e.isalnum() and e != "-":
+            raise ValueError("Invalid code entered")
+    return cleaned
+
+# Test cases for H4
+
+if __name__ == "__main__":
+    tests = [' r101 ', 'bsft-3a', 'T01', '', '  ', 'R 101', 'R101!']
+    for c in tests:
+        try:
+            print(c, "equals", normalize_code(c))
+        except ValueError as e:
+            print(c, "rejected:", e)
 
 # Base for the rest
 class Teacher:
