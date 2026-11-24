@@ -3,11 +3,11 @@
 # Rule: ALWAYS check for clashes BEFORE saving a class.
 
 from models import ClassSession
-from conflicts import check_conflicts      # Member 2's clash checker
+from conflicts import check_conflicts      # Kiran's clash checker
 
 
 def give_id(session, new_id):
-    # A ClassSession can't be changed after it is created (Member 1's rule).
+    # A ClassSession can't be changed after it is created (Aamir's rule).
     # So to give it an ID, we make a NEW session with the same details plus the ID.
     return ClassSession(
         session.get_teacher(),
@@ -17,7 +17,7 @@ def give_id(session, new_id):
         session.get_day(),
         session.get_start(),
         session.get_end(),
-        new_id,
+        new_id
     )
 
 
